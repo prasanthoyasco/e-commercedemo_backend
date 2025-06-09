@@ -2,11 +2,11 @@
   "name": "e-commercedemo_backend",
   "version": "1.0.0",
   "description": "Backend Api's for E-commerce Application",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npm server.js",
-    "dev": "nodemon server.js"
+    "start": "npm index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [
     "ecommerce",

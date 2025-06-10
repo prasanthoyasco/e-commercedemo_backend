@@ -11,12 +11,17 @@ const userSchema = new mongoose.Schema(
       lowercase: true
     },
     password: { type: String, required: true },
+    role: {
+      type: String,
+      enum: ['admin', 'customer'],
+      default: 'customer'
+    },
     otp: { type: String },
-otpExpires: { type: Date }
-
+    otpExpires: { type: Date }
   },
   { timestamps: true }
 );
+
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {

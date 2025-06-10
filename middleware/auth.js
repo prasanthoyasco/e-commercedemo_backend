@@ -3,36 +3,26 @@ const User = require('../Model/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
+// Protect middleware
 exports.protect = async (req, res, next) => {
-  let token;
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-    token = req.headers.authorization.split(' ')[1];
-    console.log('Token received:', token); // <-- Add this
+  const token = req.headers.authorization?.split(' ')[1];
+  if (!token) return res.status(401).json({ message: 'No token provided' });
 
-    try {
-      // Verify token
-      const decoded = jwt.verify(token, JWT_SECRET);
-      console.log('Decoded token:', decoded); // <-- Add this
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = await User.findById(decoded.userId).select('-password');
+    next();
+  } catch (err) {
+    res.status(401).json({ message: 'Invalid or expired token' });
+  }
+};
 
-      // Attach user to request
-      req.user = await User.findById(decoded.userId || decoded.id).select('-password'); // <-- Use userId if present
-      console.log('User found:', req.user ? req.user._id : 'No user found'); // <-- Add this
-
-      if (!req.user) {
-        return res.status(401).json({ message: 'User not found for this token.' });
-      }
-
-      next(); // Proceed to getProfile
-    } catch (error) {
-      console.error('JWT Verification Error:', error.message); // <-- CRITICAL: Log the specific JWT error
-      return res.status(401).json({ message: 'Not authorized, token invalid or expired.' });
+// Role restriction middleware
+exports.restrictToRole = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: 'You do not have permission' });
     }
-  } else {
-    console.log('No Authorization header or not Bearer format.'); // <-- Add this
-    return res.status(401).json({ message: 'Not authorized, no token provided.' });
-  }
-
-  if (!token) { // This part might be redundant if the initial if-else handles it
-    return res.status(401).json({ message: 'Not authorized, token missing.' });
-  }
+    next();
+  };
 };

@@ -8,22 +8,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
 
 exports.register = async function (req, res) {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role = 'customer' } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
-    const newUser = new User({
-      name,
-      email,
-      password: password,
-    });
-
+    const newUser = new User({ name, email, password, role });
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+
 
 exports.login = async function (req, res) {
   try {
@@ -32,18 +28,50 @@ exports.login = async function (req, res) {
     if (!user) return res.status(404).json({ message: 'User not found' });
 
     const isMatch = await bcrypt.compare(password, user.password);
-        console.log('Input password:', password);
-console.log('Stored hashed password:', user.password);
-console.log('Password match:', isMatch);
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
-    res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email } });
+    const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
+    res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email ,role:user.role } });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
-
+const createOtpEmailTemplate = (otp) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+            .container { max-width: 600px; margin: 20px auto; padding: 20px; background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+            .header { text-align: center; padding-bottom: 20px; border-bottom: 1px solid #eeeeee; }
+            .header img { width: 150px; }
+            .content { padding: 20px 0; }
+            .content p { font-size: 16px; color: #333333; line-height: 1.5; }
+            .otp-code { font-size: 36px; font-weight: bold; text-align: center; padding: 20px; background-color: #f0f0f0; border-radius: 5px; letter-spacing: 5px; margin: 20px 0; }
+            .footer { text-align: center; font-size: 12px; color: #777777; padding-top: 20px; border-top: 1px solid #eeeeee; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>ShopNow By Atelier</h1>
+                <h2>Password Reset Request</h2>
+            </div>
+            <div class="content">
+                <p>Hello,</p>
+                <p>We received a request to reset the password for your account. Please use the following One-Time Password (OTP) to proceed:</p>
+                <div class="otp-code">${otp}</div>
+                <p>This OTP is valid for 10 minutes. If you did not request this, please disregard this email.</p>
+            </div>
+            <div class="footer">
+                <p>&copy; ${new Date().getFullYear()} ShopNow By Atelier. All rights reserved.</p>
+            </div>
+        </div>
+    </body>
+    </html>
+  `;
+};
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
@@ -54,7 +82,11 @@ exports.forgotPassword = async (req, res) => {
   user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 mins
   await user.save();
 
-  await sendEmail(email, 'Password Reset OTP', `Your OTP is: ${otp}`);
+ const subject = 'Your Password Reset OTP';
+    const htmlContent = createOtpEmailTemplate(otp);
+    const textContent = `Your password reset OTP is: ${otp}. It expires in 10 minutes.`;
+
+    await sendEmail(email, subject, htmlContent, textContent);
 
   res.json({ message: 'OTP sent to your email' });
 };

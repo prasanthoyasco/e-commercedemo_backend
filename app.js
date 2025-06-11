@@ -6,6 +6,7 @@ const analyticsRoutes = require("./Router/analyticsRoutes");
 const campaignRoutes = require("./Router/campaignRoutes");
 const shiprocketRoutes = require("./Router/shiprocketRoutes");
 const authRoutes = require("./Router/authRoutes")
+const categoryRoutes = require("./Router/categoryRoutes");
 const shippingAnalyticsRoutes = require("./Router/shippingAnalyticsRoutes");
 const cors = require("cors")
 const app = express();
@@ -18,6 +19,8 @@ app.use(cors({
   credentials: true, // if using cookies or auth headers
 }));
 // Routes
+app.use("/api/categories", categoryRoutes);
+
 app.use('/api/auth', authRoutes);
 app.use("/api/analytics", shippingAnalyticsRoutes);
 app.use("/api/shiprocket", shiprocketRoutes);

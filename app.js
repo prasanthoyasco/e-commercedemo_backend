@@ -13,11 +13,24 @@ const app = express();
 require("dotenv").config();
 
 // Middleware
-app.use(express.json());
+const allowedOrigins = [
+  process.env.DASHBOARD_URI, 
+  process.env.FRONTEND_URI 
+];
+
 app.use(cors({
-  origin: process.env.DASHBOARD_URI,
-  credentials: true, // if using cookies or auth headers
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
+
 // Routes
 app.use("/api/categories", categoryRoutes);
 

@@ -17,7 +17,10 @@ const userSchema = new mongoose.Schema(
       default: 'customer'
     },
     otp: { type: String },
-    otpExpires: { type: Date }
+    otpExpires: { type: Date },
+    wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WishlistProduct' }],
+    cartList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CartPageItem' }],
+    
   },
   { timestamps: true }
 );

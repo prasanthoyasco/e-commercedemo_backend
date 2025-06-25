@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
   id: { type: String, required: true, unique: true },
-  buyer: { type: String, required: true },
+  buyer: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   location: { type: String, required: true },
   status: { type: String, enum: ["Pending", "Processing", "Completed", "Cancelled"], default: "Pending" },
   paymentMethod: { type: String, required: true },

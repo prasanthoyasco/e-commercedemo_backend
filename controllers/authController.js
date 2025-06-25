@@ -5,6 +5,14 @@ const sendEmail = require('../utils/sendEmail');
 const protect = require('../middleware/auth')
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); // exclude passwords
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to fetch users', error: err.message });
+  }
+};
 
 exports.register = async function (req, res) {
   try {
@@ -14,7 +22,7 @@ exports.register = async function (req, res) {
 
     const newUser = new User({ name, email, password, role });
     await newUser.save();
-    res.status(201).json({ message: 'User registered successfully' });
+    res.status(201).json({ message: 'User registered successfully',newUser });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
@@ -31,7 +39,12 @@ exports.login = async function (req, res) {
     if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '1d' });
-    res.status(200).json({ token, user: { id: user._id, name: user.name, email: user.email ,role:user.role } });
+    res.status(200).json({
+      token,
+      user: { _id: user._id, name: user.name, email: user.email ,role:user.role }
+
+    });
+    
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

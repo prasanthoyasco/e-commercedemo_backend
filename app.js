@@ -13,6 +13,7 @@ const cartRoutes = require('./Router/cartRoutes');
 const cors = require("cors")
 const app = express();
 require("dotenv").config();
+app.use(express.json());
 
 // Middleware
 const allowedOrigins = [
@@ -36,7 +37,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/categories", categoryRoutes);
-
+app.use("/api", require("./Router/searchRoutes"));
 app.use('/api/auth', authRoutes);
 app.use("/api/analytics", shippingAnalyticsRoutes);
 app.use("/api/shiprocket", shiprocketRoutes);

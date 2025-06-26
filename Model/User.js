@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema(
     otpExpires: { type: Date },
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'WishlistProduct' }],
     cartList: [{ type: mongoose.Schema.Types.ObjectId, ref: 'CartPageItem' }],
+    userDetails: { type: mongoose.Schema.Types.ObjectId, ref: 'CustomerDetails' },
+    customerAddress: { type: mongoose.Schema.Types.ObjectId, ref: 'CustomerAddress' },
     
   },
   { timestamps: true }

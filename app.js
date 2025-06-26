@@ -10,6 +10,9 @@ const categoryRoutes = require("./Router/categoryRoutes");
 const shippingAnalyticsRoutes = require("./Router/shippingAnalyticsRoutes");
 const wishlistRoutes = require("./Router/wishlistRoutes");
 const cartRoutes = require('./Router/cartRoutes');
+const customerDetailsRoutes = require('./Router/customerDetailsRoutes');
+const addressRoutes = require('./Router/addressRoutes');
+
 const cors = require("cors")
 const app = express();
 require("dotenv").config();
@@ -47,4 +50,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/customer-details', customerDetailsRoutes);
+app.use('/api/address', addressRoutes);
+
 module.exports = app;

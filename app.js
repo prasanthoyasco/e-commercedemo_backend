@@ -16,7 +16,8 @@ const addressRoutes = require('./Router/addressRoutes');
 const cors = require("cors")
 const app = express();
 require("dotenv").config();
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Middleware
 const allowedOrigins = [
@@ -36,7 +37,6 @@ app.use(cors({
   },
   credentials: true
 }));
-app.use(express.json());
 
 // Routes
 app.use("/api/categories", categoryRoutes);

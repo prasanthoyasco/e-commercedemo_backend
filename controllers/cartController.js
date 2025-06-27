@@ -83,4 +83,31 @@ exports.getUserCart = async (req, res) => {
     }
   };
   
+  exports.updateQuantity = async (req, res) => {
+    const { userId, productId, quantity } = req.body;
+  
+    try {
+      const cart = await Cart.findOne({ userId });
+  
+      if (!cart) {
+        return res.status(404).json({ message: 'Cart not found' });
+      }
+  
+      const product = cart.products.find(
+        (item) => item.productId.toString() === productId
+      );
+  
+      if (!product) {
+        return res.status(404).json({ message: 'Product not found in cart' });
+      }
+  
+      product.quantity = quantity; // 🔁 Set new quantity directly
+  
+      await cart.save();
+  
+      res.status(200).json({ message: 'Quantity updated', cart });
+    } catch (error) {
+      res.status(500).json({ error: 'Error updating quantity', details: error.message });
+    }
+  };
   
